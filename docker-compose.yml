@@ -1,0 +1,8 @@
+version: "1"
+services:
+  pet-app:
+    image: pet-app
+    container_name: pet-app
+    restart: always
+    ports:
+      - "8081:5002"

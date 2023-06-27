@@ -1,8 +1,7 @@
 
-
-DB_NAME="project_mobile_db"
-DB_HOST="localhost"
-DB_PORT="5432"
-DB_USER ="postgres"
-DB_PASSWORD ="Admin@123"
+DB_NAME="x"
+DB_HOST='x'
+DB_PORT="x"
+DB_USER ="x"
+DB_PASSWORD ="x"
 
