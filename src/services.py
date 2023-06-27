@@ -28,6 +28,7 @@ class Services:
             "titulo" : "",
             "bairro" : "",
             "cidade" : "",
+            "imagem" : ""
         }
 
     def __parse(self, body):
@@ -53,6 +54,7 @@ class Services:
             self.payload_publicacao["bairro"] = body.get("bairro")
             self.payload_publicacao["cidade"] = body.get("cidade")
             self.payload_publicacao["usuario"] = body.get("usuario")
+            self.payload_publicacao["imagem"] = body.get("imagem")
 
             print(self.payload_publicacao)
             return True
@@ -91,7 +93,6 @@ class Services:
     def create_publicacao(self, body):
 
         if self.__parse_publicacao(body):
-            print("oi")
             return self.publicacao_repository.post(self.payload_publicacao)
 
         return None
@@ -134,5 +135,6 @@ class Services:
             "raca" : row.raca,
             "animal" : row.animal,
             "cidade" : row.cidade,
-            "bairro" : row.bairro
+            "bairro" : row.bairro,
+            "imagem" : row.imagem
         }

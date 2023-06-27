@@ -45,6 +45,7 @@ class Publicacao(BaseModel):
     raca = TextField()
     cidade = TextField()
     bairro = TextField()
+    imagem = TextField()
 
 db.connect()
 db.create_tables([Login, Pessoa, Usuario, Publicacao, Cadastro])
