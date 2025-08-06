@@ -64,8 +64,15 @@ class LoginRepository:
 
         return Login().insert(body).execute()
     
+    def get_by_email(self, email):
+        """Get login record by email only (for password verification)"""
+        if not email:
+            return []
+        query = Login.select().where(Login.email == email)
+        return query.execute()
+    
     def login(self, body):
-
+        """Deprecated: Use get_by_email instead for secure password verification"""
         if not body:
             return Exception
         query = Login.select().where(
