@@ -1,8 +1,18 @@
-version: "1"
+version: "3.8"
 services:
   pet-app:
-    image: pet-app
+    build: .
     container_name: pet-app
     restart: always
     ports:
       - "8081:5002"
+    environment:
+      - DB_NAME=${DB_NAME:-pet_adoption_db}
+      - DB_HOST=${DB_HOST:-localhost}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY}
+      - FLASK_ENV=${FLASK_ENV:-production}
+    env_file:
+      - .env

@@ -2,6 +2,7 @@ from .repository import *
 from loguru import logger
 import datetime
 import json
+import bcrypt
 
 class Services:
     def __init__(self):
@@ -25,11 +26,31 @@ class Services:
             "descricao" : "",
             "data_criacao" : "",
             "animal" : "",
-            "titulo" : "",
+            "raca" : "",
             "bairro" : "",
             "cidade" : "",
             "imagem" : ""
         }
+
+    def _hash_password(self, password):
+        """Hash a password using bcrypt"""
+        if not password:
+            return None
+        # Convert string to bytes and hash it
+        password_bytes = password.encode('utf-8')
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(password_bytes, salt).decode('utf-8')
+    
+    def _verify_password(self, password, hashed_password):
+        """Verify a password against its hash"""
+        if not password or not hashed_password:
+            return False
+        try:
+            password_bytes = password.encode('utf-8')
+            hashed_bytes = hashed_password.encode('utf-8')
+            return bcrypt.checkpw(password_bytes, hashed_bytes)
+        except Exception:
+            return False
 
     def __parse(self, body):
         try:
@@ -76,9 +97,19 @@ class Services:
     
     @logger.catch
     def login(self, body):
-        cursor = self.login_repository.login(body)
-        for r in cursor:
-            return self.get_usuario_by_login_id(r)
+        if not body or not body.get("email") or not body.get("senha"):
+            return None
+        
+        # Get login record by email only
+        email = body.get("email")
+        login_records = self.login_repository.get_by_email(email)
+        
+        for login_record in login_records:
+            # Verify password using bcrypt
+            if self._verify_password(body.get("senha"), login_record.senha):
+                return self.get_usuario_by_login_id(login_record.id)
+        
+        return None
             
     def get_usuario_by_login_id(self, id):
         cursor = self.usuario_repository.get_by_login_id(id)
@@ -100,9 +131,15 @@ class Services:
     def create_cadastro(self, body):
 
         if self.__parse(body):
-            self.cadastro_repository.post({"nome": self.payload["nome"], "telefone": self.payload["telefone"], "email" : self.payload["email"], "senha" : self.payload["senha"]})
+            # Hash the password before storing
+            hashed_password = self._hash_password(self.payload["senha"])
+            if not hashed_password:
+                logger.error("Failed to hash password during cadastro")
+                return None
+            
+            self.cadastro_repository.post({"nome": self.payload["nome"], "telefone": self.payload["telefone"], "email" : self.payload["email"], "senha" : hashed_password})
             pessoa_id = self.pessoa_repository.post({"nome": self.payload["nome"], "telefone": self.payload["telefone"], "email" : self.payload["email"], "cidade": self.payload["cidade"], "estado" : self.payload["estado"]} )
-            login_id = self.login_repository.create_login({"email": self.payload["email"], "senha": self.payload["senha"]})
+            login_id = self.login_repository.create_login({"email": self.payload["email"], "senha": hashed_password})
 
             return self.usuario_repository.post({"pessoa_id":pessoa_id, "login_id" : login_id})
 
